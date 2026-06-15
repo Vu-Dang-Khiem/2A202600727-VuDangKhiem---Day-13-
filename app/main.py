@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -13,13 +15,20 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
-from .tracing import tracing_enabled
+from .tracing import tracing_enabled, get_langfuse_client
 
 configure_logging()
 log = get_logger()
 app = FastAPI(title="Day 13 Observability Lab")
 app.add_middleware(CorrelationIdMiddleware)
 agent = LabAgent()
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    client = get_langfuse_client()
+    if client:
+        client.flush()
 
 
 @app.on_event("startup")
@@ -44,8 +53,14 @@ async def metrics() -> dict:
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    # TODO: Enrich logs with request context (user_id_hash, session_id, feature, model, env)
-    # bind_contextvars(...)
+    # Enrich logs with request context
+    bind_contextvars(
+        user_id_hash=hash_user_id(body.user_id),
+        session_id=body.session_id,
+        feature=body.feature,
+        model="claude-sonnet-4-5",
+        env=os.getenv("APP_ENV", "dev"),
+    )
     
     log.info(
         "request_received",
@@ -87,6 +102,15 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             payload={"detail": str(exc), "message_preview": summarize_text(body.message)},
         )
         raise HTTPException(status_code=500, detail=error_type) from exc
+
+
+@app.post("/admin/flush")
+async def admin_flush() -> dict:
+    client = get_langfuse_client()
+    if client:
+        client.flush()
+        return {"ok": True, "message": "Langfuse traces flushed"}
+    return {"ok": False, "message": "Tracing not enabled"}
 
 
 @app.post("/incidents/{name}/enable")
