@@ -24,13 +24,13 @@
 ## 3. Technical Evidence (Group)
 
 ### 3.1 Logging & Tracing
-- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: docs/screenshots/dashboard_1_latency.png
-- [EVIDENCE_PII_REDACTION_SCREENSHOT]: docs/screenshots/dashboard_2_traffic.png
-- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: docs/screenshots/dashboard_3_error_rate.png
+- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: docs/dashboard_1_latency.png
+- [EVIDENCE_PII_REDACTION_SCREENSHOT]: docs/dashboard_2_traffic.png
+- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: docs/dashboard_3_error_rate.png
 - [TRACE_WATERFALL_EXPLANATION]: The `run` span captures the full agent pipeline — RAG retrieval + LLM generation. During the `rag_slow` incident, latency spiked from ~150ms to ~2650ms, visible as a long span in the waterfall. This pinpointed the retrieval step as the bottleneck.
 
 ### 3.2 Dashboard & SLOs
-- [DASHBOARD_6_PANELS_SCREENSHOT]: docs/screenshots/dashboard_1_latency.png
+- [DASHBOARD_6_PANELS_SCREENSHOT]: docs/dashboard_1_latency.png
 - [SLO_TABLE]:
 | SLI | Target | Window | Current Value |
 |---|---:|---|---:|
@@ -39,7 +39,7 @@
 | Cost Budget | < $2.5/day | 1d | $0.00 |
 
 ### 3.3 Alerts & Runbook
-- [ALERT_RULES_SCREENSHOT]: docs/screenshots/dashboard_4_cost.png
+- [ALERT_RULES_SCREENSHOT]: docs/dashboard_4_cost.png
 - [SAMPLE_RUNBOOK_LINK]: docs/alerts.md#1-high-latency-p95
 
 ---
